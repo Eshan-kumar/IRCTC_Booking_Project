@@ -22,8 +22,8 @@ public class UserBookingService {
     private static final String USERS_PATH="src/main/java/ticket/booking/localDB/users.json";
 
 
-    public UserBookingService(User user1)throws IOException {
-        this.user=user1;
+    public UserBookingService(User user)throws IOException {
+        this.user=user;
 //          File users=new File(USERS_PATH);//         userlist=objectMapper.readValue(users, new TypeReference<List<User>>() {});
         this.userlist=loadUsers();
     }
@@ -33,16 +33,21 @@ public class UserBookingService {
         this.userlist=loadUsers();
     }
 
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+
     public List<User> loadUsers()throws  IOException{
         File users=new File(USERS_PATH);
         return objectMapper.readValue(users, new TypeReference<List<User>>() {});
     }
 
-    public Boolean loginUser(String name,String password){
-        Optional<User> foundUser=userlist.stream().filter(user1->{
-            return user1.getName().equalsIgnoreCase(name) && UserServiceUtil.checkPassword(password,user1.getHashedPassword());
+    public Optional<User> loginUser(String name,String password){
+        Optional<User> foundUser=userlist.stream().filter(user->{
+            return user.getName().equalsIgnoreCase(name) &&UserServiceUtil.checkPassword(password,user.getHashedPassword());
         }).findFirst();
-        return foundUser.isPresent();
+        return foundUser;
     }
 
     public Boolean signUp(User user1){
@@ -63,7 +68,11 @@ public class UserBookingService {
     // object(User) --> json -> deserialize
 
     public void  fetchBooking(){
-        user.printTickets();
+        if(user!=null&&user.getTicketBooked()!=null && !user.getTicketBooked().isEmpty()){
+            user.printTickets();
+        }else{
+            System.out.println("No bookings found for this user");
+        }
     }
     public Boolean cancelBooking(String ticketId){
         if(ticketId==null|| ticketId.isEmpty()){

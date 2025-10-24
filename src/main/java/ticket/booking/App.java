@@ -30,7 +30,7 @@ public class App {
         while(option!=7){
             System.out.println("Choose a option");
             System.out.println("1.SignUp \n2. Login \n3. Fetch Booking\n4. Search Trains \n5. Book a Seat \n6. Cancel my Booking \n7. Exit the App");
-            option=scanner.nextInt();
+            option= scanner.nextInt();
             scanner.nextLine();
             switch(option){
                 case 1:
@@ -47,12 +47,14 @@ public class App {
                     System.out.println("Enter password to Login");
                     String passwordToLogin=scanner.nextLine();
 
-                    boolean success= userBookingService.loginUser(nameToLogin,passwordToLogin);
-                    if(success){
+                    Optional<User> success= userBookingService.loginUser(nameToLogin,passwordToLogin);
+                    if(success.isPresent()){
+                        userBookingService.setUser(success.get());
                         System.out.println("Login successful");
                     }else{
                         System.out.println("Login failed");
                     }
+                    break;
                 case 3:
                     System.out.println("Fetching ur Bookings");
                     userBookingService.fetchBooking();
@@ -71,7 +73,7 @@ public class App {
                         }
                     }
                     System.out.println("Select Trains by typing 1,2,3...");
-                    trainSelectedForBooking=trains.get(scanner.nextInt());
+                    trainSelectedForBooking=trains.get(scanner.nextInt()-1);
                     break;
                 case 5:
                     try{

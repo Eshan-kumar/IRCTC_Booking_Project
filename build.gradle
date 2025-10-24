@@ -1,8 +1,9 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
-group = 'com.example'
+group = 'ticket.booking'
 version = '1.0-SNAPSHOT'
 
 repositories {
@@ -17,6 +18,13 @@ dependencies {
     implementation 'org.mindrot:jbcrypt:0.4'
 }
 
+application{
+    mainClass = 'ticket.booking.App'
+    applicationDefaultJvmArgs = ['enable-native-access=ALL-UNNAMED']
+}
+tasks.named('run'){
+    standardInput=System.in
+}
 test {
     useJUnitPlatform()
 }
