@@ -1,1 +1,1 @@
-sorry this code has some issue , ima trying to figure it out , so don't use it
+Its working now , ignore the dummy values and i will give it the professional touchup later
