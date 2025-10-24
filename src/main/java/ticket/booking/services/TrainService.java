@@ -61,7 +61,7 @@ public class TrainService {
     private Boolean validTrain(Train train,String source,String dest){
         List<String> stationOrder=train.getStations();
         int sourceIndex=stationOrder.indexOf(source.toLowerCase());
-        int destIndex=stationOrder.indexOf(source.toLowerCase());
+        int destIndex=stationOrder.indexOf(dest.toLowerCase());
         return sourceIndex!= -1&& destIndex!=-1 && sourceIndex<destIndex;
     }
 

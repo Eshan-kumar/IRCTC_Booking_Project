@@ -3,6 +3,7 @@ package ticket.booking.services;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ticket.booking.entities.Train;
+import ticket.booking.entities.Ticket;
 import ticket.booking.entities.User;
 import ticket.booking.util.UserServiceUtil;
 
@@ -37,6 +38,10 @@ public class UserBookingService {
         this.user = user;
     }
 
+    public User getUser() {
+        return this.user;
+    }
+
 
     public List<User> loadUsers()throws  IOException{
         File users=new File(USERS_PATH);
@@ -45,15 +50,27 @@ public class UserBookingService {
 
     public Optional<User> loginUser(String name,String password){
         Optional<User> foundUser=userlist.stream().filter(user->{
-            return user.getName().equalsIgnoreCase(name) &&UserServiceUtil.checkPassword(password,user.getHashedPassword());
+            return user.getName() != null && user.getHashedPassword() != null && 
+                   user.getName().equalsIgnoreCase(name) && UserServiceUtil.checkPassword(password,user.getHashedPassword());
         }).findFirst();
         return foundUser;
     }
 
     public Boolean signUp(User user1){
         try{
+            // Check if user already exists
+            Optional<User> existingUser = userlist.stream()
+                .filter(user -> user.getName() != null && user.getName().equalsIgnoreCase(user1.getName()))
+                .findFirst();
+            
+            if(existingUser.isPresent()) {
+                System.out.println("User with this username already exists. Please login instead.");
+                return Boolean.FALSE;
+            }
+            
             userlist.add(user1);
             saveUserListToFile();
+            System.out.println("Signup successful!");
             return Boolean.TRUE;
         }catch(IOException e){
             return Boolean.FALSE;
@@ -68,7 +85,12 @@ public class UserBookingService {
     // object(User) --> json -> deserialize
 
     public void  fetchBooking(){
-        if(user!=null&&user.getTicketBooked()!=null && !user.getTicketBooked().isEmpty()){
+        if(user == null) {
+            System.out.println("No user logged in. Please login first.");
+            return;
+        }
+        
+        if(user.getTicketBooked()!=null && !user.getTicketBooked().isEmpty()){
             user.printTickets();
         }else{
             System.out.println("No bookings found for this user");
@@ -118,6 +140,21 @@ public class UserBookingService {
                     seats.get(row).set(seat,1);
                     train.setSeats(seats);
                     trainService.updateTrain(train);
+                    
+                    // Create and add ticket to user's booked tickets
+                    if(user != null) {
+                        String ticketId = java.util.UUID.randomUUID().toString();
+                        String source = train.getStations().get(0); // First station
+                        String destination = train.getStations().get(train.getStations().size() - 1); // Last station
+                        String dateOfTravel = java.time.LocalDate.now().toString();
+                        
+                        Ticket ticket = new Ticket(ticketId, user.getUserId(), source, destination, dateOfTravel, train);
+                        user.getTicketBooked().add(ticket);
+                        
+                        // Save updated user data
+                        saveUserListToFile();
+                    }
+                    
                     return true;
                 }else{
                     return false; // seat is already booked
